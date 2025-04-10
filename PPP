@@ -1,0 +1,44 @@
+# Priyesh-Open-Ended
+pip install pytesseract pillow pdf2image pymupdf
+import fitz  # PyMuPDF
+import pytesseract
+from PIL import Image
+from pdf2image import convert_from_path
+import os
+
+def extract_text_from_pdf(pdf_path):
+    text = ""
+    try:
+        doc = fitz.open(pdf_path)
+        for page in doc:
+            text += page.get_text()
+        doc.close()
+    except Exception as e:
+        print("Text-based PDF reading failed:", e)
+        text = ""
+    return text.strip()
+
+def extract_text_with_ocr(pdf_path):
+    images = convert_from_path(pdf_path)
+    full_text = ""
+    for i, image in enumerate(images):
+        text = pytesseract.image_to_string(image)
+        full_text += text + "\n"
+    return full_text.strip()
+
+def read_resume(file_path):
+    print(f"Reading: {file_path}")
+    text = extract_text_from_pdf(file_path)
+
+    if not text:
+        print("No text found. Trying OCR...")
+        text = extract_text_with_ocr(file_path)
+
+    return text
+
+# Example usage
+if __name__ == "__main__":
+    file_path = "sample_resume.pdf"  # Replace with your resume file
+    resume_text = read_resume(file_path)
+    print("\n--- Extracted Resume Text ---\n")
+    print(resume_text)
